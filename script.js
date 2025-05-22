@@ -1,30 +1,94 @@
-function playGame() {
-  // create a gameBoard
-  function createBoard() {
-    // First create an array with 3 empty elements
-    const rows = 3;
-    const cols = 3;
-    const matrix = new Array(rows);
+function startGame() {
+  const board = document.getElementById("board");
+  const circleClass = "circle";
+  const x_Class = "x";
+  let circleTurn;
+  const cellElements = document.querySelectorAll("[data-cell]");
+  const winningArray = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  const restartButton = document.getElementById("RestartButton");
+  restartButton.addEventListener("click", restartGame);
+  const winningClass = document.getElementById("winning-messege");
+  const winningBoard = document.querySelector("[data-winning-message-text]");
+  startHover();
+  //First start Hover
+  function startHover() {
+    circleTurn = false;
+    cellElements.forEach((cell) => {
+      cell.addEventListener("click", handleClick, { once: true });
+    });
+    setBoardhoverClass();
+  }
+  //Handling Clicks
+  function handleClick(e) {
+    console.log("clicked");
+    const cell = e.target;
+    const currentClass = circleTurn ? circleClass : x_Class;
+    placemarks(cell, currentClass);
+    const isWin = checkWin(currentClass);
+    const checDraw = isDraw();
 
-    // Then fill each element with an array
-    for (let i = 0; i < rows; i++) {
-      matrix[i] = new Array(cols);
-    }
-
-    // Now fill with values
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        matrix[i][j] = 0; // Example filling pattern
-      }
+    if (isWin) {
+      winningBoard.innerText = `${circleTurn ? "O" : "X"} Wins!`;
+      winningClass.classList.add("show");
+    } else if (checDraw) {
+      winningBoard.innerText = "It's a Draw";
+      winningClass.classList.add("show");
+    } else {
+      switchplayer();
+      setBoardhoverClass();
     }
   }
-  //Get input from the cosole
 
-  //update the input in the array
+  function isDraw() {
+    return [...cellElements].every((cell) => {
+      return (
+        cell.classList.contains(x_Class) || cell.classList.contains(circleClass)
+      );
+    });
+  }
 
-  //make sure it's a legal move
+  function setBoardhoverClass() {
+    board.classList.remove(circleClass);
+    board.classList.remove(x_Class);
+    if (circleTurn) {
+      board.classList.add(circleClass);
+    } else if (!circleTurn) {
+      board.classList.add(x_Class);
+    }
+  }
+  function switchplayer() {
+    circleTurn = !circleTurn;
+  }
+  function placemarks(cell, currentClass) {
+    cell.classList.add(currentClass);
+  }
+  function checkWin(currentClass) {
+    return winningArray.some((combinations) => {
+      return combinations.every((index) => {
+        return cellElements[index].classList.contains(currentClass);
+      });
+    });
+  }
+  function restartGame() {
+    const winningClass = document.getElementById("winning-messege");
+    winningClass.classList.remove("show");
 
-  // apply a logic for the winning
+    cellElements.forEach((cell) => {
+      cell.addEventListener("click", handleClick, { once: true });
+      cell.classList.remove(x_Class);
+      cell.classList.remove(circleClass);
+      cell.removeEventListener("click", handleClick);
+    });
+  }
 }
 
-playGame();
+startGame();
